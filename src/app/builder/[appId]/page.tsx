@@ -10,6 +10,7 @@ export default function BuilderPage({ params }: { params: { appId: string } }) {
 
   const handleSave = async () => {
     // TODO: Save to DB via API
+    // eslint-disable-next-line no-console
     console.log("Saving blocks:", blocks);
     alert("Configuración guardada (demo)");
   };

@@ -1,18 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Block } from "@/components/blocks";
+import type { Block } from "./types";
+
+interface AppConfig {
+  id: string;
+  name: string;
+  blocks: Block[];
+  branding?: {
+    logo?: string;
+    primaryColor?: string;
+    font?: string;
+  };
+}
 
 interface PortalRuntimeProps {
   appId: string;
 }
 
 export function PortalRuntime({ appId }: PortalRuntimeProps) {
-  const [appConfig, setAppConfig] = useState<any>(null);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "detail" | "form">("list");
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     async function loadApp() {
@@ -46,6 +57,8 @@ export function PortalRuntime({ appId }: PortalRuntimeProps) {
     );
   }
 
+  if (!appConfig) return null;
+  
   const { name, blocks, branding } = appConfig;
   const primaryColor = branding?.primaryColor || "#2563EB";
 

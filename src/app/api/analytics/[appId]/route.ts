@@ -130,7 +130,7 @@ export async function GET(
 
     // Get time series data
     const timeSeries = await prisma.appAnalytics.groupBy({
-      by: ["eventType"],
+      by: ["eventType", "createdAt"],
       where: {
         ...where,
         createdAt: {
