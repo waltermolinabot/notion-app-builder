@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User - managed by Clerk, we just store the relation
+model User {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  apps        App[]
+  dataSources DataSource[]
+  subscriptions Subscription[]
+}
+
+// App - the published portals
+model App {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  
+  // Branding
+  logo        String?
+  primaryColor String  @default("#2563EB")
+  customDomain String?
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  dataSources DataSource[]
+  blocks      Block[]
+  roles       Role[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// DataSource - Notion connections
+model DataSource {
+  id            String   @id @default(cuid())
+  name          String
+  type          String   @default("notion") // notion, etc.
+  
+  // Notion specific
+  notionAccessToken String?
+  notionWorkspaceId String?
+  notionWorkspaceName String?
+  
+  // Connection status
+  connected     Boolean  @default(false)
+  lastSyncAt    DateTime?
+  
+  // Relations
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  appId         String?
+  app           App?     @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  notionDatabases NotionDatabase[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// NotionDatabase - synced databases from Notion
+model NotionDatabase {
+  id            String   @id @default(cuid())
+  notionId      String   @unique
+  name          String
+  icon          String?
+  
+  // Field mappings
+  schema        Json     // Field name -> type mapping
+  
+  // Relations
+  dataSourceId  String
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Block - visual blocks in the builder
+model Block {
+  id          String   @id @default(cuid())
+  type        String   // table, cards, detail, form
+  config      Json     // block-specific config
+  
+  position    Int      @default(0)
+  
+  // Relations
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Role - user roles in an app
+model Role {
+  id          String   @id @default(cuid())
+  name        String   // admin, editor, viewer
+  permissions Json     // permission config
+  
+  // Relations
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+}
+
+// Subscription - Stripe subscriptions
+model Subscription {
+  id              String   @id @default(cuid())
+  
+  // Stripe data
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  stripePriceId   String?
+  status          String   @default("inactive") // active, canceled, past_due
+  
+  // Plan limits
+  plan            String   @default("free") // free, pro, agency
+  appsLimit       Int      @default(1)
+  usersLimit      Int      @default(100)
+  customDomain    Boolean  @default(false)
+  
+  // Relations
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  currentPeriodEnd DateTime?
+}
