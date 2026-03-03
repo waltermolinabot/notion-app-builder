@@ -89,8 +89,31 @@ model NotionDatabase {
   dataSourceId  String
   dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
   
+  syncedRows    SyncedRow[]
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// SyncedRow - cached rows from Notion
+model SyncedRow {
+  id            String   @id @default(cuid())
+  notionId      String   @unique
+  properties    Json
+  lastEditedTime String
+  url           String?
+  
+  // Sync metadata
+  syncedAt      DateTime @default(now())
+  
+  // Relations
+  databaseId    String
+  database      NotionDatabase @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([databaseId, lastEditedTime])
 }
 
 // Block - visual blocks in the builder
