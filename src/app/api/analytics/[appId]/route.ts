@@ -156,7 +156,7 @@ export async function GET(
     });
 
     // Calculate totals
-    const totalEvents = eventCounts.reduce((sum, e) => sum + e._count.id, 0);
+    const totalEvents = eventCounts.reduce((sum: number, e) => sum + e._count.id, 0);
 
     return NextResponse.json({
       period,
