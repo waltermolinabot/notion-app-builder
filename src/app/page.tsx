@@ -193,6 +193,46 @@ export default function MarketingPage() {
       </section>
       
       {/* CTA */}
+      <section id="demo" className="py-24 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">
+            See It In Action
+          </h2>
+          <p className="text-slate-600 mb-8 max-w-xl mx-auto">
+            Watch how easy it is to create a client portal from your Notion data.
+          </p>
+          <div className="bg-slate-100 rounded-xl p-8 max-w-3xl mx-auto">
+            <div className="aspect-video bg-slate-200 rounded-lg flex items-center justify-center">
+              <p className="text-slate-500">Demo video placeholder</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-24">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Frequently Asked Questions
+          </h2>
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <h3 className="font-semibold mb-2">Do I need coding skills?</h3>
+              <p className="text-slate-600">No! Notion App Builder is designed for non-technical users. Just connect your Notion and publish.</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <h3 className="font-semibold mb-2">Is my data secure?</h3>
+              <p className="text-slate-600">Yes. We use industry-standard encryption and your data is never stored on our servers.</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <h3 className="font-semibold mb-2">Can I use my own domain?</h3>
+              <p className="text-slate-600">Yes! On Pro and Agency plans you can connect your own domain.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA */}
       <section className="py-24 bg-slate-900 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
@@ -212,8 +252,24 @@ export default function MarketingPage() {
       
       {/* Footer */}
       <footer className="py-8 bg-white border-t">
-        <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>&copy; 2026 Notion App Builder. All rights reserved.</p>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-slate-500 text-sm">&copy; 2026 Notion App Builder. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link href="/giver" className="text-sm text-slate-500 hover:text-slate-900">
+                Giver
+              </Link>
+              <Link href="#features" className="text-sm text-slate-500 hover:text-slate-900">
+                Features
+              </Link>
+              <Link href="#pricing" className="text-sm text-slate-500 hover:text-slate-900">
+                Pricing
+              </Link>
+              <Link href="#faq" className="text-sm text-slate-500 hover:text-slate-900">
+                FAQ
+              </Link>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
