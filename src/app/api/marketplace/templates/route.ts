@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(
-      templates.map((t) => ({
+      templates.map((t: any) => ({
         id: t.id,
         name: t.name,
         description: t.description,
