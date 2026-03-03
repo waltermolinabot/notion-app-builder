@@ -142,7 +142,78 @@ model Role {
   appId       String
   app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
   
+  userRoles   UserRole[]
+  
   createdAt   DateTime @default(now())
+}
+
+// UserRole - user role assignments
+model UserRole {
+  id        String   @id @default(cuid())
+  
+  // User reference (Clerk ID)
+  userId    String
+  email     String
+  
+  // Relations
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, roleId])
+}
+
+// Notification - user notifications
+model Notification {
+  id          String   @id @default(cuid())
+  type        String   // app_published, data_synced, role_changed, etc.
+  title       String
+  message     String
+  read        Boolean  @default(false)
+  readAt      DateTime?
+  
+  // Link to related entity
+  link        String?
+  entityType  String?  // app, datasource, role
+  entityId    String?
+  
+  // User reference
+  userId      String
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// AuditLog - system audit logs
+model AuditLog {
+  id          String   @id @default(cuid())
+  
+  // Action details
+  action      String   // created, updated, deleted, published, etc.
+  entityType  String   // app, block, datasource, role, user
+  entityId    String?
+  
+  // Change details
+  changes     Json?    // { before: {}, after: {} }
+  
+  // User who performed the action
+  userId      String?
+  userEmail   String?
+  
+  // IP address
+  ipAddress   String?
+  
+  // App context (for multi-tenant)
+  appId       String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // Subscription - Stripe subscriptions

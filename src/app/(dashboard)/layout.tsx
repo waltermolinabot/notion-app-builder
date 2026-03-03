@@ -1,14 +1,20 @@
 export const dynamic = 'force-dynamic';
 
 import { UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { LayoutDashboard, AppWindow, Settings, CreditCard, Database } from "lucide-react";
+import { LayoutDashboard, AppWindow, Settings, CreditCard, Database, History } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await currentUser();
+  const userId = user?.id;
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
@@ -65,6 +71,10 @@ export default function DashboardLayout({
       
       {/* Main content */}
       <main className="flex-1 p-8">
+        {/* Header with notifications */}
+        <div className="flex justify-end mb-6">
+          {userId && <NotificationBell userId={userId} />}
+        </div>
         {children}
       </main>
     </div>
