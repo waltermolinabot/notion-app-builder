@@ -189,3 +189,173 @@ export async function fetchAllNotionRows(
 
   return allRows;
 }
+
+/**
+ * Create a new row in a Notion database
+ */
+export async function createNotionRow(
+  accessToken: string,
+  databaseId: string,
+  properties: Record<string, any>
+): Promise<NotionRow | null> {
+  const notion = getNotionClient(accessToken);
+
+  try {
+    // Transform properties to Notion format
+    const notionProperties: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(properties)) {
+      if (value === undefined || value === null) continue;
+
+      if (typeof value === "string") {
+        notionProperties[key] = {
+          rich_text: [{ text: { content: value } }],
+        };
+      } else if (typeof value === "number") {
+        notionProperties[key] = {
+          number: value,
+        };
+      } else if (typeof value === "boolean") {
+        notionProperties[key] = {
+          checkbox: value,
+        };
+      } else if (Array.isArray(value)) {
+        if (value.length > 0 && typeof value[0] === "string") {
+          notionProperties[key] = {
+            multi_select: value.map((v) => ({ name: v })),
+          };
+        } else {
+          notionProperties[key] = {
+            rich_text: [{ text: { content: JSON.stringify(value) } }],
+          };
+        }
+      } else if (typeof value === "object" && value !== null) {
+        // Handle select fields
+        if (value.name) {
+          notionProperties[key] = {
+            select: { name: value.name },
+          };
+        } else if (value.start) {
+          notionProperties[key] = {
+            date: { start: value.start, end: value.end },
+          };
+        } else {
+          notionProperties[key] = {
+            rich_text: [{ text: { content: JSON.stringify(value) } }],
+          };
+        }
+      } else {
+        notionProperties[key] = {
+          rich_text: [{ text: { content: String(value) } }],
+        };
+      }
+    }
+
+    const page = await notion.pages.create({
+      parent: { database_id: databaseId },
+      properties: notionProperties,
+    });
+
+    return transformNotionPageToRow(page, databaseId);
+  } catch (error) {
+    console.error("Failed to create Notion row:", error);
+    return null;
+  }
+}
+
+/**
+ * Update an existing row in a Notion database
+ */
+export async function updateNotionRow(
+  accessToken: string,
+  pageId: string,
+  properties: Record<string, any>
+): Promise<NotionRow | null> {
+  const notion = getNotionClient(accessToken);
+
+  try {
+    // Transform properties to Notion format
+    const notionProperties: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(properties)) {
+      if (value === undefined) continue;
+
+      if (value === null) {
+        notionProperties[key] = {
+          rich_text: [],
+        };
+      } else if (typeof value === "string") {
+        notionProperties[key] = {
+          rich_text: [{ text: { content: value } }],
+        };
+      } else if (typeof value === "number") {
+        notionProperties[key] = {
+          number: value,
+        };
+      } else if (typeof value === "boolean") {
+        notionProperties[key] = {
+          checkbox: value,
+        };
+      } else if (Array.isArray(value)) {
+        if (value.length > 0 && typeof value[0] === "string") {
+          notionProperties[key] = {
+            multi_select: value.map((v) => ({ name: v })),
+          };
+        } else {
+          notionProperties[key] = {
+            rich_text: [{ text: { content: JSON.stringify(value) } }],
+          };
+        }
+      } else if (typeof value === "object" && value !== null) {
+        if (value.name) {
+          notionProperties[key] = {
+            select: { name: value.name },
+          };
+        } else if (value.start) {
+          notionProperties[key] = {
+            date: { start: value.start, end: value.end },
+          };
+        } else {
+          notionProperties[key] = {
+            rich_text: [{ text: { content: JSON.stringify(value) } }],
+          };
+        }
+      } else {
+        notionProperties[key] = {
+          rich_text: [{ text: { content: String(value) } }],
+        };
+      }
+    }
+
+    const page = await notion.pages.update({
+      page_id: pageId,
+      properties: notionProperties,
+    });
+
+    return transformNotionPageToRow(page, "");
+  } catch (error) {
+    console.error("Failed to update Notion row:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete a row from a Notion database
+ */
+export async function deleteNotionRow(
+  accessToken: string,
+  pageId: string
+): Promise<boolean> {
+  const notion = getNotionClient(accessToken);
+
+  try {
+    await notion.pages.update({
+      page_id: pageId,
+      archived: true,
+    });
+    return true;
+  } catch (error) {
+    console.error("Failed to delete Notion row:", error);
+    return false;
+  }
+}
