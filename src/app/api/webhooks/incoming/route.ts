@@ -121,7 +121,7 @@ async function handleRowEvent(event: string, data: any, app: any) {
   // Import row handling - sync to Notion
   const { createNotionRow, updateNotionRow, deleteNotionRow } = await import("@/lib/notion/rows");
 
-  let result = null;
+  let result: any = null;
 
   switch (event) {
     case "row.created":
