@@ -2,12 +2,17 @@ export const dynamic = 'force-dynamic';
 
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, ArrowRight, Globe, Lock, Zap } from "lucide-react";
 
 export default async function DashboardPage() {
   const user = await currentUser();
+  
+  if (!user) {
+    redirect("/sign-in");
+  }
   
   return (
     <div className="space-y-8">
@@ -82,7 +87,7 @@ export default async function DashboardPage() {
             <ArrowRight className="w-5 h-5 text-slate-400" />
           </div>
           
-          <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
+          <Link href="/dashboard/notion" className="flex items-center gap-4 p-4 border rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-green-600" />
             </div>
@@ -91,7 +96,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-slate-500">Link your workspace and select databases</p>
             </div>
             <ArrowRight className="w-5 h-5 text-slate-400" />
-          </div>
+          </Link>
         </CardContent>
       </Card>
     </div>
