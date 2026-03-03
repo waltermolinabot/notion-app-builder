@@ -163,7 +163,7 @@ export async function GET(
       summary: {
         totalEvents,
         uniqueVisitors: uniqueVisitors.length,
-        eventsByType: eventCounts.map((e) => ({
+        eventsByType: eventCounts.map((e: { eventType: string; _count: { id: number } }) => ({
           eventType: e.eventType,
           count: e._count.id,
         })),
