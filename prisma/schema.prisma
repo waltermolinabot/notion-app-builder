@@ -19,6 +19,7 @@ model User {
   apps        App[]
   dataSources DataSource[]
   subscriptions Subscription[]
+  templates   Template[]
 }
 
 // App - the published portals
@@ -35,6 +36,11 @@ model App {
   primaryColor String  @default("#2563EB")
   customDomain String?
 
+  // Public sharing
+  isPublic    Boolean  @default(false)
+  publicPassword String?  // Optional password protection
+  publicAccessToken String?  // Token for shared links
+
   // Relations
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -42,6 +48,7 @@ model App {
   dataSources DataSource[]
   blocks      Block[]
   roles       Role[]
+  analytics   AppAnalytics[]
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -240,4 +247,59 @@ model Subscription {
   updatedAt       DateTime @updatedAt
   
   currentPeriodEnd DateTime?
+}
+
+// Template - Marketplace templates (user-created)
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String?
+  category    String   @default("custom") // crm, internal, projects, custom
+  
+  // Template data (blocks configuration)
+  blocks      Json
+  
+  // Publishing
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  
+  // Stats
+  downloads   Int      @default(0)
+  rating      Float    @default(0)
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([category])
+  @@index([published])
+}
+
+// AppAnalytics - Basic analytics for apps
+model AppAnalytics {
+  id          String   @id @default(cuid())
+  
+  // Event types: page_view, row_view, form_submit, etc.
+  eventType   String
+  
+  // Event data
+  metadata    Json?
+  
+  // Session/user info
+  sessionId   String?
+  userAgent   String?
+  ipAddress   String?
+  
+  // Relations
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([appId, createdAt])
+  @@index([eventType, createdAt])
 }
