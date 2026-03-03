@@ -1,9 +1,16 @@
 import Stripe from 'stripe';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-  typescript: true,
-});
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+
+export const stripe = stripeKey 
+  ? new Stripe(stripeKey, {
+      apiVersion: '2026-02-25.clover',
+      typescript: true,
+    })
+  : null;
+
+// Helper to check if Stripe is configured
+export const isStripeConfigured = () => !!stripe;
 
 // Plan configuration
 export const PLANS = {
@@ -36,9 +43,9 @@ export const PLANS = {
 export type PlanType = keyof typeof PLANS;
 
 export async function getOrCreateCustomer(userId: string, email: string) {
+  if (!stripe) throw new Error('Stripe not configured');
   const { prisma } = await import('@/lib/prisma');
   
-  // Check if user already has a subscription with stripe customer
   const subscription = await prisma.subscription.findFirst({
     where: { userId },
   });
@@ -47,7 +54,6 @@ export async function getOrCreateCustomer(userId: string, email: string) {
     return subscription.stripeCustomerId;
   }
 
-  // Create new customer
   const customer = await stripe.customers.create({
     metadata: { userId },
     email,
@@ -63,6 +69,7 @@ export async function createCheckoutSession(
   successUrl: string,
   cancelUrl: string
 ) {
+  if (!stripe) throw new Error('Stripe not configured');
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
@@ -87,6 +94,7 @@ export async function createPortalSession(
   customerId: string,
   returnUrl: string
 ) {
+  if (!stripe) throw new Error('Stripe not configured');
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: returnUrl,
@@ -96,9 +104,11 @@ export async function createPortalSession(
 }
 
 export async function getSubscription(subscriptionId: string) {
+  if (!stripe) throw new Error('Stripe not configured');
   return stripe.subscriptions.retrieve(subscriptionId);
 }
 
 export async function cancelSubscription(subscriptionId: string) {
+  if (!stripe) throw new Error('Stripe not configured');
   return stripe.subscriptions.cancel(subscriptionId);
 }
